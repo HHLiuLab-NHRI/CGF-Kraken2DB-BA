@@ -2,8 +2,8 @@
 
 # Define directories and databases based on your uploaded scripts
 SANKEY_DIR="../sankey"
-DE_FUN_DB="/mnt/preData1/prFungiDB/k2_fungi_default/"
-N_FUN_DB="/mnt/preData1/prFungiDB/Kraken2_DB/"
+DE_FUN_DB="../../k2_fungi_default/"
+N_FUN_DB="../../Kraken2_DB/"
 THREADS=64  # Adjust based on your server capacity
 
 echo "Starting Kraken2 Sankey runs..."

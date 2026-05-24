@@ -1,5 +1,6 @@
 # Install Kraken2 default fungi database at $HOME/share/db/kraken2/fungi/
-# Run sequentially
+# Change directory to ./working/
+# Run sequentially the followings
 # Downloading
 ./12152025_01_dlSRA.sh
 ./12192025_00_random2MSRR.sh

@@ -41,12 +41,18 @@ for c in summary_csvs:
     dfCSV = pd.read_csv(c)
     df = pd.concat([df, dfCSV], axis=0, ignore_index=True).fillna(0)
 
-# Group by Sample Name ('Identifier') and Sum
-df = df.groupby('Identifier', as_index=False).sum()
+# Group by Sample Name ('Identifier') and sum
+df = df.groupby('Identifier', as_index=False).sum(numeric_only=True)
 
-# Divide by the number of replicates (e.g., 5) to get the Average
-# Note: df.iloc[:, 1:] selects all columns except 'Identifier'
-df.iloc[:, 1:] = df.iloc[:, 1:] / len(summary_csvs)
+# Average numeric genus columns using float dtype
+numeric_cols = df.columns.drop('Identifier')
+df = pd.concat(
+    [
+        df[['Identifier']],
+        df[numeric_cols].astype('float64').div(len(summary_csvs))
+    ],
+    axis=1
+)
 
 # Save final matrix
 output_file = oDir + 'genusAverage.csv'

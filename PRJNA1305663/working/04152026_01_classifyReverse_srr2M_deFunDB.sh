@@ -4,9 +4,9 @@
 INPUT_PARENT_DIR="../srr2Mreads/"
 # OUTPUT: Where R2 results will go (Separate directory)
 # OUTPUT_PARENT_DIR="../kraken2Output_R2/"
-OUTPUT_PARENT_DIR="../kraken2Output_R2_nFunDB/"
+OUTPUT_PARENT_DIR="../kraken2Output_R2_deFunDB/"
 # KRAKEN2_DB="$HOME/share/db/kraken2/fungi/"
-KRAKEN2_DB="../Kraken2_DB/"
+KRAKEN2_DB="../../k2_fungi_default/"
 
 mkdir -p "$OUTPUT_PARENT_DIR"
 

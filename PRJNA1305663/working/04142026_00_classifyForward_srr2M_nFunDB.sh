@@ -5,9 +5,9 @@
 INPUT_PARENT_DIR="../srr2Mreads/"
 # OUTPUT: Where R1 results will go
 # OUTPUT_PARENT_DIR="../kraken2Output_R1/"
-OUTPUT_PARENT_DIR="../kraken2Output_R1_deFunDB/"
+OUTPUT_PARENT_DIR="../kraken2Output_R1_nFunDB/"
 # KRAKEN2_DB="$HOME/share/db/kraken2/fungi/"
-KRAKEN2_DB="../k2_fungi_default/"
+KRAKEN2_DB="../../Kraken2_DB/"
 
 # Create the output parent directory if it doesn't exist
 mkdir -p "$OUTPUT_PARENT_DIR"
