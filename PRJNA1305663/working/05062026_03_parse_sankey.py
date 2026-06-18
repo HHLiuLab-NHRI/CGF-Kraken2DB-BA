@@ -34,13 +34,13 @@ def process_sankey_data(def_report, enh_report, def_out, enh_out, output_file):
         return
 
     # 2. Map readable names from the Default Report
-    taxid_to_name = {'0': 'Unclassified (Default DB)'}
+    taxid_to_name = {'0': 'Unclassified (Non-enhanced DB)'}
     try:
         with open(def_report, 'r') as f:
             for line in f:
                 parts = line.rstrip('\n').split('\t')
                 if len(parts) < 6: continue
-                taxid_to_name[parts[4]] = f"{parts[5].strip()} (Default DB)"
+                taxid_to_name[parts[4]] = f"{parts[5].strip()} (Non-enhanced DB)"
     except FileNotFoundError:
         print(f"  -> Error: Could not find {def_report}")
         return
@@ -74,7 +74,7 @@ def process_sankey_data(def_report, enh_report, def_out, enh_out, output_file):
     with open(output_file, 'w') as out_f:
         out_f.write(f"// SankeyMATIC data for {os.path.basename(output_file)}\n")
         for old_taxid, new_targets in transitions.items():
-            source_name = taxid_to_name.get(old_taxid, f"TaxID {old_taxid} (Default DB)")
+            source_name = taxid_to_name.get(old_taxid, f"TaxID {old_taxid} (Non-enhanced DB)")
             for new_genus, count in new_targets.items():
                 if count > 5: # Filter out 1-off random noise
                     out_f.write(f"{source_name} [{count}] {new_genus}\n")
