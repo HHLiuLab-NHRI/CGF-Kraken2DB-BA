@@ -23,8 +23,12 @@
 ./12242025_01_suppStat.py
 
 # -----------------------------------------------------------------------------
-# 2. CGF/PHF-enhanced fungal reference
+# 2. CGF-enhanced fungal reference
 #    Legacy suffix: nFunDB
+#    Historical build audit: the final enhanced DB contains 665 RefSeq-derived
+#    representatives + 128 CGF-derived representatives = 793 source entries.
+#    PHF genomes were part of an earlier 1,210-genome catalog/clustering stage
+#    but did not contribute novel representatives to this final database.
 # -----------------------------------------------------------------------------
 ./04142026_00_classifyForward_srr2M_nFunDB.sh
 ./04142026_01_classifyReverse_srr2M_nFunDB.sh
@@ -38,7 +42,7 @@
 # -----------------------------------------------------------------------------
 # 3. Locally rebuilt non-enhanced NCBI-derived fungal reference
 #    Legacy suffix: deFunDB
-#    This is a control rebuilt without the novel CGF/PHF representatives.
+#    This is a control rebuilt without the 128 CGF-derived representatives.
 #    It is NOT the older original/default Kraken2 fungal reference above.
 # -----------------------------------------------------------------------------
 ./04152026_00_classifyForward_srr2M_deFunDB.sh
@@ -75,3 +79,6 @@ python3 validate_final_results.py
 # Exploratory/legacy scripts such as paired, three-group, BA-vs-H+U, and pfFunDB
 # analyses are retained for provenance but are not part of the final manuscript
 # analysis path described above.
+
+# See ../REPRODUCIBILITY.md for the retrospective database-build audit and the
+# distinction between the initial CGF+PHF catalog and the final CGF-enhanced DB.
