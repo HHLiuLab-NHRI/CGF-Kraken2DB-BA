@@ -1,16 +1,50 @@
 # Reproducibility snapshot
 
-This repository includes the scripts used to construct and analyze the three fungal reference configurations in the manuscript.
+This repository includes the scripts used to construct and analyze the three fungal reference configurations in the manuscript. The notes below distinguish contemporaneous analysis outputs from conclusions established later during a retrospective audit of the archived build tree.
 
 ## Database mapping
 
 | Manuscript configuration | Historical analysis suffix | Best-supported finalization date |
 |---|---|---|
 | Original/default Kraken2 fungal reference | no suffix | 2024-07-11 |
-| CGF/PHF-enhanced fungal reference | `nFunDB` | 2026-04-10 |
+| CGF-enhanced fungal reference | `nFunDB` | 2026-04-10 |
 | Locally rebuilt non-enhanced NCBI-derived control | `deFunDB` | 2026-04-15 |
 
 The dates above are based on filesystem evidence from the database files and build markers captured from the analysis workstation. They should be interpreted as best-supported finalization dates rather than stronger provenance claims.
+
+## Retrospective audit of the historical enhanced-database build
+
+During preparation of the manuscript/repository reproducibility materials, the archived `prFungiDB` project tree, intermediate tables, BUSCO summaries, and final database-library contents were audited against the public scripts.
+
+The audit established the following historical path:
+
+1. The source accession sets contained **708 cultivated gut fungal (CGF) genomes** and **502 publicly available human-associated fungal (PHF) genomes**, with no overlap: **1,210 genomes total**.
+2. The initial FastANI file list contained all **1,210 genomes (708 CGF + 502 PHF)**.
+3. The later RefSeq novelty-screening query list contained **708 genomes, all CGF**. PHF genomes did not enter this screening stage.
+4. The 708-genome assignment table contained:
+   - 395 `Assigned`;
+   - 2 `Conflict` (ANI >=95% to more than one reference species cluster);
+   - 281 `Novel`;
+   - 30 `Novel (No Hits)`.
+   Thus **311 CGF genomes** proceeded as putatively novel candidates.
+5. The 311 candidates formed **131 ANI clusters**, of which 63 had more than one member.
+6. Final filtering retained **128 representatives**, all recorded as `Fungi` in the archived final validation table.
+7. The RefSeq-derived baseline contained **665 representatives**.
+8. The formatted enhanced database contained **665 RefSeq-derived + 128 CGF-derived = 793 source FASTA entries**.
+
+Accordingly, the final enhanced database used for the BA analysis should be described as **CGF-enhanced** (or, more generally, human-associated-fungal enhanced), not as a database containing both CGF- and PHF-derived novel representatives. The earlier shorthand `CGF/PHF-enhanced` is retained only where needed to explain historical directory or project naming.
+
+### BUSCO representative-handling audit
+
+The archived representative-selection script (`CGFNovelScripts/12092025_08_select_representatives.py`) ranks genomes within each novel cluster by fungal BUSCO completeness (descending) and then fragmentation (ascending). The downstream refinement script (`CGFNovelScripts/12092025_09_refine_and_filter.py`), however, resolves the sequence path from the row's pre-existing `representative` field rather than from the BUSCO-ranked row's `genome_filename` field.
+
+In the archived output, these fields differed in **34 of 131 clusters**. Therefore, in those 34 clusters, the sequence carried forward was the preassigned cluster representative rather than the genome associated with the highest BUSCO-based ranking stored on that selected row.
+
+A direct retrospective check of the archived fungi_odb10 BUSCO summaries for the 34 sequences actually carried forward showed that **all 34 had fungal BUSCO completeness >=50%**; none failed the fungal completeness threshold used for final retention. No BUSCO summary was missing for these checks.
+
+This distinction affects the description of representative selection and provenance, but it does not change which historical database was used for the reported BA analysis. The historical scripts are preserved rather than silently modified because substituting BUSCO-top-ranked sequences would define a different Kraken2 database and would require a full reanalysis.
+
+The current software snapshot reports BUSCO 5.5.0, but this is not asserted to be the exact BUSCO version used during the historical build unless independently recovered from the archived BUSCO logs.
 
 ## Analysis chronology
 
@@ -18,7 +52,7 @@ The default-reference genus-average matrices were produced on 2025-12-23, the en
 
 ## Software environment snapshot
 
-The following versions were installed when reproducibility metadata was collected on 2026-10-05:
+The following versions were installed when reproducibility metadata were collected on 2026-10-05:
 
 - Kraken2 / kraken2-build: 2.1.3
 - FastANI: 1.33
