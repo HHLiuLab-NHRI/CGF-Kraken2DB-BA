@@ -8,11 +8,11 @@ This repository supports the manuscript **“Human-associated fungal genomes res
 
 The project began as an independent attempt to replicate previously reported BA-associated *Aspergillus/Penicillium* signals using the standard Kraken2 fungal reference. Default-reference profiling showed a broad BA-skewed fungal signal but did not recover the expected genera. This discrepancy motivated expansion of the fungal reference space with human-associated fungal genomes, followed by a rebuilt non-enhanced control and read-level reassignment analysis.
 
-The archived database-development project initially assembled two human-associated fungal resources: 708 cultivated gut fungal (CGF) genomes and 502 publicly available human-associated fungal (PHF) genomes (1,210 genomes total). These 1,210 genomes were examined in an initial ANI-based clustering stage. The historical database-expansion pipeline then screened the **708 CGF genomes** against the RefSeq fungal baseline. PHF genomes did not enter that RefSeq novelty-screening step and did not contribute representatives to the final enhanced database.
+The archived database-development project initially assembled two human-associated fungal resources: 708 cultivated gut fungal (CGF) genomes and 502 publicly available human-associated fungal (PHF) genomes (1,210 genomes total). These 1,210 genomes were examined in an initial ANI-based clustering stage. The database-expansion pipeline then screened the **708 CGF genomes** against the RefSeq fungal baseline. PHF genomes did not enter that RefSeq novelty-screening step and did not contribute representatives to the final enhanced database.
 
 The repository therefore contains two linked workflows:
 
-1. **Fungal database construction**: CGF/PHF acquisition and initial clustering, RefSeq baseline construction, CGF-versus-RefSeq screening, novel-CGF clustering and BUSCO QC, taxonomy placement, and Kraken2 database construction.
+1. **Fungal database construction**: CGF/PHF acquisition and initial clustering, RefSeq baseline construction, CGF-versus-RefSeq screening, novel-CGF clustering, deterministic representative selection, BUSCO QC, taxonomy placement, and Kraken2 database construction.
 2. **BA metagenomic analysis**: public SRA download, five independent 2-million-read subsamples per sample/read direction, Kraken2 classification, genus-level summaries, BA-versus-healthy statistics, direct confidence intervals, and read-level reassignment/Sankey analysis.
 
 ## Database configurations used in the manuscript
@@ -29,20 +29,20 @@ The historical directory suffixes are retained in the original scripts, but the 
 
 ## Repository structure
 
-- `mkDB/` — entry point for the historical database-construction workflow.
+- `mkDB/` — entry point for the database-construction workflow.
 - `scripts_GCF+PHF/` — initial ANI-based clustering of the 1,210-genome CGF+PHF catalog.
 - `refCalibrationScripts/` — calibration/clustering of reference fungal genomes and taxonomy metadata.
 - `CGFvsRefScripts/` — FastANI comparison of the 708 CGF genomes against the RefSeq-derived reference set; ANI >=95% is treated as represented at the species-cluster level.
 - `CGFNovelScripts/` — clustering/QC of putatively novel CGF genomes, representative handling, phylogenetic placement, custom taxonomy, and final enhanced Kraken2 database construction.
 - `PRJNA1305663/` — BA cohort metadata and downstream metagenomic analysis.
-- `REPRODUCIBILITY.md` — database finalization evidence, retrospective build audit, environment snapshot, and final statistical validation targets.
+- `REPRODUCIBILITY.md` — database construction accounting, environment snapshot, and final statistical validation targets.
 - `requirements.txt` — Python package requirements used across the scripts.
 
 ## Input data
 
 ### Human-associated fungal genomes
 
-The historical workflow downloaded 708 CGF accessions and 502 PHF accessions. The combined 1,210-genome catalog was used for an initial clustering analysis. The final enhanced Kraken2 database, however, was constructed from the CGF branch of the workflow: 708 CGF genomes were screened against the RefSeq baseline, 311 lacked an ANI >=95% species-level match, and 128 quality-controlled representatives were ultimately added to the database.
+The workflow downloaded 708 CGF accessions and 502 PHF accessions. The combined 1,210-genome catalog was used for an initial clustering analysis. The final enhanced Kraken2 database, however, was constructed from the CGF branch of the workflow: 708 CGF genomes were screened against the RefSeq baseline, 311 lacked an ANI >=95% species-level match, and 128 quality-controlled representatives were ultimately added to the database.
 
 The CGF metadata input `Table S2.xlsx` can be obtained from the supplementary archive associated with the source publication:
 
@@ -62,22 +62,24 @@ Follow the scripts listed in:
 mkDB/README.txt
 ```
 
-The historical workflow includes:
+The workflow includes:
 
 - acquisition of 708 CGF and 502 PHF genomes;
 - initial ANI-based clustering of the combined 1,210-genome catalog;
 - construction/calibration of the RefSeq fungal baseline;
 - **CGF-only** screening against that baseline at ANI >=95%;
 - clustering of the 311 putatively novel CGF genomes into 131 ANI clusters;
-- BUSCO-based QC and final retention of 128 representatives;
+- deterministic representative selection as the lexicographically first accession/filename within each ANI cluster;
+- BUSCO quality control of the selected representatives;
+- final retention of 128 representatives;
 - taxonomic placement of retained representatives;
 - custom taxids beginning at 3,000,000,000;
 - generation of Kraken2-compatible taxonomy/FASTA files;
 - final `kraken2-build` database construction.
 
-The resulting enhanced database contains **665 RefSeq fungal representatives plus 128 CGF-derived representatives = 793 source entries**.
+For representative QC, `fungi_odb10` BUSCO completeness >=50% is retained. Representatives below this threshold are evaluated with `microsporidia_odb10` and retained only if completeness is >=65%. Of 131 ANI-cluster representatives, 128 passed final QC and 3 were excluded.
 
-A retrospective audit of the archived build outputs also identified a historical representative-handling detail: in 34 of 131 novel clusters, the sequence carried forward by the downstream refinement script was the cluster’s preassigned representative rather than the genome associated with the highest BUSCO-based ranking in the selection table. Direct review of the archived BUSCO outputs confirmed that all 34 carried representatives nevertheless met the fungal BUSCO completeness threshold (>=50%) used for final retention. This is documented in `REPRODUCIBILITY.md`; the historical scripts are preserved rather than silently rewritten because changing representative selection would define a different database.
+The resulting enhanced database contains **665 RefSeq fungal genomes plus 128 CGF-derived representatives = 793 source entries**.
 
 The rebuilt non-enhanced database is a control constructed from the NCBI-derived fungal reference without addition of the 128 CGF-derived representatives. It should not be confused with the older original/default Kraken2 fungal database used for the initial replication attempt.
 
@@ -123,7 +125,7 @@ The updated workflow:
 
 ## Reproducibility snapshot
 
-The best-supported database finalization dates, historical build audit, analysis chronology, current software-environment snapshot, and final statistical validation targets are recorded in `REPRODUCIBILITY.md`.
+The best-supported database finalization dates, database construction accounting, analysis chronology, current software-environment snapshot, and final statistical validation targets are recorded in `REPRODUCIBILITY.md`.
 
 Database dates are filesystem evidence and should not be interpreted as stronger historical provenance than the available metadata support.
 
