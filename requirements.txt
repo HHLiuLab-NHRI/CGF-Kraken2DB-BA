@@ -1,0 +1,7 @@
+numpy>=1.26
+pandas>=2.1
+scipy>=1.11
+statsmodels>=0.14
+biopython>=1.83
+networkx>=3.0
+ete3>=3.1
