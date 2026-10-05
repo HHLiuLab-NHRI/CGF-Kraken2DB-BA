@@ -95,11 +95,9 @@ The original workflow analyzes R1 and R2 independently and averages five random 
 
 The final statistical tables use:
 
-- Mann-Whitney U tests;
-- Benjamini-Hochberg false-discovery-rate correction;
+- Mann-Whitney U tests with Benjamini-Hochberg false-discovery-rate correction;
 - descriptive log2 fold change calculated as `log2[(mean BA + 0.1)/(mean healthy + 0.1)]`;
-- rank-biserial correlation, `r = 2U/(nBA*nH) - 1`;
-- 95% confidence intervals calculated directly from the observed sample distributions using DeLong structural-component variance for the equivalent AUC statistic, with `r = 2*AUC - 1` and ties counted as 0.5.
+- rank-biserial correlation with direct 95% confidence intervals.
 
 After the genus-average matrices are generated, run:
 
@@ -109,7 +107,7 @@ python3 direct_ci_rank_biserial.py
 python3 validate_final_results.py
 ```
 
-The validation script checks the six final database/read-direction analyses and the manuscript values for *Penicillium* and *Aspergillus*.
+These scripts reproduce the confidence intervals and validate the six final database/read-direction analyses against the reported results.
 
 ## Read-level reassignment / Sankey analysis
 
