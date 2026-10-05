@@ -1,37 +1,38 @@
-#! /bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Configuration
 SEED=100
 READ_COUNT=2000000
 SRA_DIR="../sra"
 OUT_DIR="../sankey"
+R1_LIST="${OUT_DIR}/top5_penicillium_R1.csv"
+R2_LIST="${OUT_DIR}/top5_penicillium_R2.csv"
 
-# Ensure the output directory exists
+command -v seqtk >/dev/null 2>&1 || { echo "[ERROR] seqtk not found" >&2; exit 1; }
 mkdir -p "$OUT_DIR"
 
-# -------------------------------
-# READ 1 PROCESSING
-# -------------------------------
-echo "Starting Read 1 pooling..."
-> "${OUT_DIR}/pooled_R1.fastq" # Initialize/clear the output file
+pool_read() {
+    local label="$1"
+    local list_file="$2"
+    local output_file="$3"
 
-for ID in SRR35008939_1 SRR35009027_1 SRR35008943_1 SRR35008946_1 SRR35008968_1; do
-    echo "  Subsampling 2M reads from ${ID}.fastq.gz..."
-    # seqtk outputs directly to stdout, so we append (>>) to our pooled file
-    seqtk sample -s$SEED "${SRA_DIR}/${ID}.fastq.gz" $READ_COUNT >> "${OUT_DIR}/pooled_R1.fastq"
-done
+    [[ -f "$list_file" ]] || { echo "[ERROR] Missing $list_file. Run 05062026_00_find_top_penicillium.py first." >&2; exit 1; }
+    mapfile -t ids < <(tail -n +2 "$list_file" | cut -d',' -f1 | sed '/^$/d')
+    [[ ${#ids[@]} -eq 5 ]] || { echo "[ERROR] Expected 5 samples in $list_file; found ${#ids[@]}" >&2; exit 1; }
 
-# -------------------------------
-# READ 2 PROCESSING
-# -------------------------------
-echo -e "\nStarting Read 2 pooling..."
-> "${OUT_DIR}/pooled_R2.fastq" # Initialize/clear the output file
+    : > "$output_file"
+    echo "Pooling $label from samples selected in $list_file"
+    for id in "${ids[@]}"; do
+        fq="${SRA_DIR}/${id}.fastq.gz"
+        [[ -f "$fq" ]] || { echo "[ERROR] Missing $fq" >&2; exit 1; }
+        echo "  Subsampling ${READ_COUNT} reads from ${id}.fastq.gz"
+        seqtk sample -s"$SEED" "$fq" "$READ_COUNT" >> "$output_file"
+    done
+}
 
-for ID in SRR35008939_2 SRR35009027_2 SRR35008943_2 SRR35008946_2 SRR35008968_2; do
-    echo "  Subsampling 2M reads from ${ID}.fastq.gz..."
-    seqtk sample -s$SEED "${SRA_DIR}/${ID}.fastq.gz" $READ_COUNT >> "${OUT_DIR}/pooled_R2.fastq"
-done
+pool_read "R1" "$R1_LIST" "${OUT_DIR}/pooled_R1.fastq"
+pool_read "R2" "$R2_LIST" "${OUT_DIR}/pooled_R2.fastq"
 
-echo -e "\nDone! Your 10-million read pooled files are ready at:"
+echo "Done. Pooled files:"
 echo "  ${OUT_DIR}/pooled_R1.fastq"
 echo "  ${OUT_DIR}/pooled_R2.fastq"
