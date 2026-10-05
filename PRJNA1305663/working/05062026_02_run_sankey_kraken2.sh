@@ -1,45 +1,37 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Define directories and databases based on your uploaded scripts
 SANKEY_DIR="../sankey"
-DE_FUN_DB="../../k2_fungi_default/"
-N_FUN_DB="../../Kraken2_DB/"
-THREADS=64  # Adjust based on your server capacity
+NONENHANCED_DB="${NONENHANCED_KRAKEN_DB:-../../k2_fungi_default/}"
+ENHANCED_DB="${ENHANCED_KRAKEN_DB:-../../Kraken2_DB/}"
+THREADS="${THREADS:-64}"
 
-echo "Starting Kraken2 Sankey runs..."
+command -v kraken2 >/dev/null 2>&1 || { echo "[ERROR] kraken2 not found" >&2; exit 1; }
+[[ -d "$NONENHANCED_DB" ]] || { echo "[ERROR] Non-enhanced DB not found: $NONENHANCED_DB" >&2; exit 1; }
+[[ -d "$ENHANCED_DB" ]] || { echo "[ERROR] Enhanced DB not found: $ENHANCED_DB" >&2; exit 1; }
+mkdir -p "$SANKEY_DIR"
 
-# ------------------------------------------------------------------
-# READ 1 RUNS
-# ------------------------------------------------------------------
-echo "Running Read 1 against Default Fungi DB..."
-kraken2 --db "$DE_FUN_DB" \
-  --threads $THREADS \
-  --report "${SANKEY_DIR}/default_R1_report.txt" \
-  --output "${SANKEY_DIR}/default_R1.txt" \
-  "${SANKEY_DIR}/pooled_R1.fastq"
+run_pair() {
+    local read="$1"
+    local input="${SANKEY_DIR}/pooled_${read}.fastq"
+    [[ -f "$input" ]] || { echo "[ERROR] Missing pooled input: $input" >&2; exit 1; }
 
-echo "Running Read 1 against Enhanced Fungi DB..."
-kraken2 --db "$N_FUN_DB" \
-  --threads $THREADS \
-  --report "${SANKEY_DIR}/enhanced_R1_report.txt" \
-  --output "${SANKEY_DIR}/enhanced_R1.txt" \
-  "${SANKEY_DIR}/pooled_R1.fastq"
+    echo "Running ${read} against locally rebuilt non-enhanced fungal DB..."
+    kraken2 --db "$NONENHANCED_DB" \
+      --threads "$THREADS" \
+      --report "${SANKEY_DIR}/nonenhanced_${read}_report.txt" \
+      --output "${SANKEY_DIR}/nonenhanced_${read}.txt" \
+      "$input"
 
-# ------------------------------------------------------------------
-# READ 2 RUNS
-# ------------------------------------------------------------------
-echo "Running Read 2 against Default Fungi DB..."
-kraken2 --db "$DE_FUN_DB" \
-  --threads $THREADS \
-  --report "${SANKEY_DIR}/default_R2_report.txt" \
-  --output "${SANKEY_DIR}/default_R2.txt" \
-  "${SANKEY_DIR}/pooled_R2.fastq"
+    echo "Running ${read} against CGF/PHF-enhanced fungal DB..."
+    kraken2 --db "$ENHANCED_DB" \
+      --threads "$THREADS" \
+      --report "${SANKEY_DIR}/enhanced_${read}_report.txt" \
+      --output "${SANKEY_DIR}/enhanced_${read}.txt" \
+      "$input"
+}
 
-echo "Running Read 2 against Enhanced Fungi DB..."
-kraken2 --db "$N_FUN_DB" \
-  --threads $THREADS \
-  --report "${SANKEY_DIR}/enhanced_R2_report.txt" \
-  --output "${SANKEY_DIR}/enhanced_R2.txt" \
-  "${SANKEY_DIR}/pooled_R2.fastq"
+run_pair R1
+run_pair R2
 
-echo "Kraken2 runs complete! All outputs are in ${SANKEY_DIR}/"
+echo "Kraken2 Sankey runs complete. Outputs are in ${SANKEY_DIR}/"
