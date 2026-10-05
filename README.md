@@ -33,7 +33,7 @@ The historical directory suffixes are retained in the original scripts, but the 
 - `CGFvsRefScripts/` — FastANI comparison of CGF/PHF genomes against the reference set; ANI >=95% is treated as already represented.
 - `CGFNovelScripts/` — clustering/QC of putatively novel genomes, representative selection, phylogenetic placement, custom taxonomy, and final enhanced Kraken2 database construction.
 - `PRJNA1305663/` — BA cohort metadata and downstream metagenomic analysis.
-- `REPRODUCIBILITY.md` — database fingerprints, dates, environment snapshot, and analysis-output hashes.
+- `REPRODUCIBILITY.md` — database finalization evidence, environment snapshot, and final statistical validation targets.
 - `requirements.txt` — Python package requirements used across the scripts.
 
 ## Input data
@@ -116,9 +116,9 @@ The updated workflow:
 
 ## Reproducibility snapshot
 
-Exact SHA-256 fingerprints of the three Kraken2 database instances used for the analysis, together with the best-supported database finalization dates and current software-environment snapshot, are recorded in `REPRODUCIBILITY.md`.
+The best-supported database finalization dates, analysis chronology, current software-environment snapshot, and final statistical validation targets are recorded in `REPRODUCIBILITY.md`.
 
-The database dates are filesystem evidence and should not be interpreted as stronger historical provenance than the available metadata support. Core-file SHA-256 hashes are provided as durable identifiers of the exact database instances.
+Database dates are filesystem evidence and should not be interpreted as stronger historical provenance than the available metadata support.
 
 ## Software
 
